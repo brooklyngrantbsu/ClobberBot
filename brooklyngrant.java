@@ -2,12 +2,23 @@
 import java.awt.geom.*;
 import java.awt.*;
 import java.util.*;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 
 public class brooklyngrant extends ClobberBot {
+    private BufferedImage myImage;
     
     public brooklyngrant(Clobber game) {
         super(game);
 
+        try {
+            // Load the image from a file
+            myImage = ImageIO.read(new File("deathstar.png"));
+        } catch (IOException e) {
+            e.printStackTrace(); // Handle exception if file is not found
+        }
     }
 
     ClobberBotAction currAction;
@@ -54,8 +65,10 @@ public class brooklyngrant extends ClobberBot {
         int x,y;
         x=(int)me.getX() - Clobber.MAX_BOT_GIRTH/2 -1;
         y=(int)me.getY() - Clobber.MAX_BOT_GIRTH/2 -1;
-        page.setColor(mycolor);
-        page.fillOval(x,y, Clobber.MAX_BOT_GIRTH,Clobber.MAX_BOT_GIRTH);
+        
+        if (myImage != null) {
+            page.drawImage(myImage, x, y, Clobber.MAX_BOT_GIRTH, Clobber.MAX_BOT_GIRTH, null);
+        }
     }
 
     public String toString()
