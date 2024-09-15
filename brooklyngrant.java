@@ -22,6 +22,8 @@ public class brooklyngrant extends ClobberBot {
     ClobberBotAction currAction;
 
     public ClobberBotAction takeTurn(WhatIKnow currState) {
+        long startTime = System.currentTimeMillis();
+
         Point2D myPos = currState.me;
         Vector<BulletPoint2D> bullets = currState.bullets;
         Vector<BotPoint2D> bots = currState.bots;
@@ -34,6 +36,13 @@ public class brooklyngrant extends ClobberBot {
             currAction = new ClobberBotAction(1, ClobberBotAction.SHOOT);
         } else {
             currAction = decideMovement(avoidVector, myPos);
+        }
+
+        long endTime = System.currentTimeMillis();
+        long elapsedTime = endTime - startTime;
+
+        if (elapsedTime > 10) { // if time is bigger than 10ms (1/100 of a second)
+            System.out.println("TOO SLOW: Elapsed time: " + elapsedTime + " milliseconds");
         }
 
         return currAction;
