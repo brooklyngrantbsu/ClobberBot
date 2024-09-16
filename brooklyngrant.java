@@ -8,7 +8,8 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * brooklyngrant (onyx users)
+ * brooklyngrant (onyx username)
+ * By Brooklyn Grant and Megan Aker
  */
 public class brooklyngrant extends ClobberBot {
     private BufferedImage myImage;
