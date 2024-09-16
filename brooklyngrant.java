@@ -199,9 +199,9 @@ public class brooklyngrant extends ClobberBot {
         double predictDy = predictedY;// - me.getY();
     
         if (Math.abs(predictDx) > Math.abs(predictDy)) {
-            return new ClobberBotAction(1, predictDx > 0 ? (ClobberBotAction.SHOOT | ClobberBotAction.RIGHT) : (ClobberBotAction.SHOOT | ClobberBotAction.LEFT));
+            return new ClobberBotAction(2, predictDx > 0 ? (ClobberBotAction.SHOOT | ClobberBotAction.RIGHT) : (ClobberBotAction.SHOOT | ClobberBotAction.LEFT));
         } else {
-            return new ClobberBotAction(1, predictDy > 0 ? (ClobberBotAction.SHOOT | ClobberBotAction.DOWN) : (ClobberBotAction.SHOOT | ClobberBotAction.UP));
+            return new ClobberBotAction(2, predictDy > 0 ? (ClobberBotAction.SHOOT | ClobberBotAction.DOWN) : (ClobberBotAction.SHOOT | ClobberBotAction.UP));
         }
     }
     
