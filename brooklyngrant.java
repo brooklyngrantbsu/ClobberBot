@@ -1,18 +1,27 @@
 import java.awt.geom.*;
 import java.awt.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * brooklyngrant (onyx users)
+ */
 public class brooklyngrant extends ClobberBot {
     private BufferedImage myImage;
     private Map<BotPoint2D, Point2D> previousPositions = new HashMap<>();
     
+    /**
+     * Constructor
+     * @param game
+     */
     public brooklyngrant(Clobber game) {
         super(game);
 
+        // load death star imageas avatar
         try {
             myImage = ImageIO.read(new File("deathstar.png"));
         } catch (IOException e) {
@@ -25,7 +34,11 @@ public class brooklyngrant extends ClobberBot {
     private final int SAFE_DISTANCE = 50; 
     private final int SHOOT_DISTANCE = 150; 
 
+    /**
+     * Plan moves
+     */
     public ClobberBotAction takeTurn(WhatIKnow currState) {
+        
         Point2D me = currState.me;
         Vector<BulletPoint2D> bullets = currState.bullets;
         Vector<BotPoint2D> bots = currState.bots;

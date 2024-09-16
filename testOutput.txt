@@ -1,0 +1,36 @@
+Running iteration 10
+Matched -loadplayer
+Seed = 1726510928697
+Loading player brooklyngrant.class
+loading classes = brooklyngrant.class
+classname = brooklyngrant.class
+Loading player p1.class
+loading classes = p1.class
+classname = p1.class
+Loading player p1.class
+loading classes = p1.class
+classname = p1.class
+Loading player p1.class
+loading classes = p1.class
+classname = p1.class
+Loading player p12.class
+loading classes = p12.class
+classname = p12.class
+Loading player p12.class
+loading classes = p12.class
+classname = p12.class
+Loading player p12.class
+loading classes = p12.class
+classname = p12.class
+Adding teammate p1 to p1's team.
+Adding teammate p1 to p1's team.
+Adding teammate p1 to p1's team.
+Adding teammate p1 to p1's team.
+Adding teammate p1 to p1's team.
+Adding teammate p1 to p1's team.
+Adding teammate p12 bot by Jeff Cope to p12 bot by Jeff Cope's team.
+Adding teammate p12 bot by Jeff Cope to p12 bot by Jeff Cope's team.
+Adding teammate p12 bot by Jeff Cope to p12 bot by Jeff Cope's team.
+Adding teammate p12 bot by Jeff Cope to p12 bot by Jeff Cope's team.
+Adding teammate p12 bot by Jeff Cope to p12 bot by Jeff Cope's team.
+Adding teammate p12 bot by Jeff Cope to p12 bot by Jeff Cope's team.
