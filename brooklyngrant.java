@@ -36,8 +36,11 @@ public class brooklyngrant extends ClobberBot {
 
     /**
      * Plan moves
+     * Execution time is less than 1/100 of a second
      */
-    public ClobberBotAction takeTurn(WhatIKnow currState) {
+    public ClobberBotAction takeTurn(WhatIKnow currState) {        
+        
+        long startTime = System.currentTimeMillis();
         
         Point2D me = currState.me;
         Vector<BulletPoint2D> bullets = currState.bullets;
@@ -58,7 +61,7 @@ public class brooklyngrant extends ClobberBot {
         updatePreviousPositions(bots); //update past bots position
     
         if (currAction == null || ((currAction.getAction() & ClobberBotAction.SHOOT) > 0) || rand.nextInt(10) > 8) {
-            // random logic
+            // random logic - better to shoot then to not!
             switch (rand.nextInt(8)) {
                 case 0: currAction = new ClobberBotAction(rand.nextInt(2) + 1, ClobberBotAction.UP); break;
                 case 1: currAction = new ClobberBotAction(rand.nextInt(2) + 1, ClobberBotAction.DOWN); break;
@@ -70,15 +73,33 @@ public class brooklyngrant extends ClobberBot {
                 default: currAction = new ClobberBotAction(rand.nextInt(2) + 1, ClobberBotAction.DOWN | ClobberBotAction.RIGHT); break;
             }
         }
+
+        long estimatedTime = System.currentTimeMillis() - startTime;
+        if (estimatedTime > 10) {
+            System.out.println("The execution time was longer than 1/100 of a second.");
+        }
+
         return currAction;
     }
     
+    /**
+     * Update the previous positions of bots - this 
+     * is used to calculate velocities and future 
+     * positions
+     * @param bots
+     */
     private void updatePreviousPositions(Vector<BotPoint2D> bots) {
         for (BotPoint2D bot : bots) {
             previousPositions.put(bot, new Point2D.Double(bot.getX(), bot.getY()));
         }
     }    
 
+    /**
+     * Locate the nearest bullet to dodge
+     * @param me
+     * @param bullets
+     * @return
+     */
     private BulletPoint2D findNearestBullet(Point2D me, Vector<BulletPoint2D> bullets) {
         BulletPoint2D nearest = null;
         double minDistance = Double.MAX_VALUE;
@@ -92,6 +113,12 @@ public class brooklyngrant extends ClobberBot {
         return nearest;
     }
 
+    /**
+     * Move from bullet!
+     * @param me
+     * @param bullet
+     * @return
+     */
     private ClobberBotAction moveAwayFromBullet(Point2D me, BulletPoint2D bullet) {
         double dx = me.getX() - bullet.getX();
         double dy = me.getY() - bullet.getY();
@@ -102,6 +129,12 @@ public class brooklyngrant extends ClobberBot {
         }
     }
 
+    /**
+     * Find the closest bot to us
+     * @param me
+     * @param bots
+     * @return
+     */
     private BotPoint2D findNearestBot(Point2D me, Vector<BotPoint2D> bots) {
         BotPoint2D nearest = null;
         double minDistance = Double.MAX_VALUE;
@@ -115,6 +148,12 @@ public class brooklyngrant extends ClobberBot {
         return nearest;
     }
 
+    /**
+     * Shoot at bot
+     * @param me
+     * @param bot
+     * @return
+     */
     private ClobberBotAction shootAtBot(Point2D me, BotPoint2D bot) {
         Point2D previousPosition = previousPositions.get(bot);
         double botVelocityX = 0;
@@ -126,7 +165,6 @@ public class brooklyngrant extends ClobberBot {
             botVelocityY = bot.getY() - previousPosition.getY();
         }
     
-        // estimate time to impact (using Euclidean distance)
         double distance = me.distance(bot);
         double timeToImpact = distance;
     
@@ -146,6 +184,9 @@ public class brooklyngrant extends ClobberBot {
     }
     
 
+    /**
+     * Draw avatar
+     */
     public void drawMe(Graphics page, Point2D me) {
         int x, y;
         x = (int) me.getX() - Clobber.MAX_BOT_GIRTH / 2 - 1;
@@ -157,6 +198,6 @@ public class brooklyngrant extends ClobberBot {
     }
 
     public String toString() {
-        return "Brooklyn Grant";
+        return "Brooklyn Grant and Megan Aker";
     }
 }
