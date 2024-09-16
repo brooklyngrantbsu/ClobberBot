@@ -1,7 +1,6 @@
 import java.awt.geom.*;
 import java.awt.*;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -41,11 +40,13 @@ public class brooklyngrant extends ClobberBot {
      */
     public ClobberBotAction takeTurn(WhatIKnow currState) {        
         
-        long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis(); // starting point of take turn logic
         
         Point2D me = currState.me;
         Vector<BulletPoint2D> bullets = currState.bullets;
         Vector<BotPoint2D> bots = currState.bots;
+        
+        updatePreviousPositions(bots); //update past bots position
     
         BulletPoint2D nearestBullet = findNearestBullet(me, bullets);
         if (nearestBullet != null && me.distance(nearestBullet) < SAFE_DISTANCE) {
@@ -58,8 +59,6 @@ public class brooklyngrant extends ClobberBot {
             currAction = shootAtBot(me, nearestBot);
             return currAction;
         }
-    
-        updatePreviousPositions(bots); //update past bots position
     
         if (currAction == null || ((currAction.getAction() & ClobberBotAction.SHOOT) > 0) || rand.nextInt(10) > 8) {
             // random logic - better to shoot then to not!
@@ -75,9 +74,9 @@ public class brooklyngrant extends ClobberBot {
             }
         }
 
-        long estimatedTime = System.currentTimeMillis() - startTime;
-        if (estimatedTime > 10) {
-            System.out.println("The execution time was longer than 1/100 of a second.");
+        long elapsedTime = System.currentTimeMillis() - startTime; // difference between end time and start is elapsed
+        if (elapsedTime > 10) {
+            System.out.println("The execution time was longer than 1/100 of a second."); // if this is called then it is too long!
         }
 
         return currAction;
@@ -99,19 +98,19 @@ public class brooklyngrant extends ClobberBot {
      * Locate the nearest bullet to dodge
      * @param me
      * @param bullets
-     * @return
+     * @return nearest bullet
      */
     private BulletPoint2D findNearestBullet(Point2D me, Vector<BulletPoint2D> bullets) {
         BulletPoint2D nearest = null;
-        double minDistance = Double.MAX_VALUE;
+        double minDistance = Double.MAX_VALUE; // big value to set the first bullet to closest before going through
         for (BulletPoint2D bullet : bullets) {
             double distance = me.distance(bullet);
-            if (distance < minDistance) {
+            if (distance < minDistance) { // if less than the nearest distance
                 minDistance = distance;
                 nearest = bullet;
             }
         }
-        return nearest;
+        return nearest; // returning closest bullet
     }
 
     /**
@@ -121,24 +120,26 @@ public class brooklyngrant extends ClobberBot {
      * @return
      */
     private ClobberBotAction moveAwayFromBullet(Point2D me, BulletPoint2D bullet) {
-        double dx = me.getX() - bullet.getX();
-        double dy = me.getY() - bullet.getY();
-        if (Math.abs(dx) > Math.abs(dy)) {
-            return new ClobberBotAction(1, dx > 0 ? ClobberBotAction.RIGHT : ClobberBotAction.LEFT);
+        double x = me.getX() - bullet.getX();
+        double y = me.getY() - bullet.getY();
+        if (Math.abs(x) > Math.abs(y)) { // if |x| > |y|, then you must move right or left
+            return new ClobberBotAction(1, x > 0 ? ClobberBotAction.RIGHT : ClobberBotAction.LEFT);
         } else {
-            return new ClobberBotAction(1, dy > 0 ? ClobberBotAction.DOWN : ClobberBotAction.UP);
+            return new ClobberBotAction(1, y > 0 ? ClobberBotAction.DOWN : ClobberBotAction.UP);
         }
     }
 
+
     /**
      * Find the closest bot to us
+     * Same logic as findNearestBullet
      * @param me
      * @param bots
      * @return
      */
     private BotPoint2D findNearestBot(Point2D me, Vector<BotPoint2D> bots) {
         BotPoint2D nearest = null;
-        double minDistance = Double.MAX_VALUE;
+        double minDistance = Double.MAX_VALUE; // big value to set first to less
         for (BotPoint2D bot : bots) {
             double distance = me.distance(bot);
             if (distance < minDistance) {
@@ -160,18 +161,17 @@ public class brooklyngrant extends ClobberBot {
         double botVelocityX = 0;
         double botVelocityY = 0;
     
-        // calculate velocity of bot if we have old positions to predict moves
+        // calculate velocity of bot if we have old positions to predict where it will move
         if (previousPosition != null) {
             botVelocityX = bot.getX() - previousPosition.getX();
             botVelocityY = bot.getY() - previousPosition.getY();
         }
     
-        double distance = me.distance(bot);
-        double timeToImpact = distance;
+        double distanceFromMe = me.distance(bot);
     
         // predict the bot's future position
-        double predictedX = bot.getX() + botVelocityX * timeToImpact;
-        double predictedY = bot.getY() + botVelocityY * timeToImpact;
+        double predictedX = bot.getX() + botVelocityX * distanceFromMe;
+        double predictedY = bot.getY() + botVelocityY * distanceFromMe;
     
         // shoot this way
         double predictDx = predictedX - me.getX();
