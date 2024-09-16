@@ -31,8 +31,8 @@ public class brooklyngrant extends ClobberBot {
 
     ClobberBotAction currAction;
 
-    private final int SAFE_DISTANCE = 50; 
-    private final int SHOOT_DISTANCE = 150; 
+    private final int SAFE_DISTANCE = 30; 
+    private final int SHOOT_DISTANCE = 250; 
 
     /**
      * Plan moves
@@ -55,9 +55,14 @@ public class brooklyngrant extends ClobberBot {
         }
     
         BotPoint2D nearestBot = findNearestBot(me, bots);
-        if (nearestBot != null && me.distance(nearestBot) < SHOOT_DISTANCE) {
-            currAction = shootAtBot(me, nearestBot);
-            return currAction;
+        if (nearestBot != null) {
+            if (me.distance(nearestBot) < SAFE_DISTANCE) {
+                currAction = moveAwayFromBot(me, nearestBot);
+                return currAction;
+            } else if (me.distance(nearestBot) < SHOOT_DISTANCE) {
+                currAction = shootAtBot(me, nearestBot);
+                return currAction;
+            }
         }
     
         if (currAction == null || ((currAction.getAction() & ClobberBotAction.SHOOT) > 0) || rand.nextInt(10) > 8) {
@@ -128,6 +133,22 @@ public class brooklyngrant extends ClobberBot {
             return new ClobberBotAction(1, y > 0 ? ClobberBotAction.DOWN : ClobberBotAction.UP);
         }
     }
+    
+    /**
+     * Move from bot!
+     * @param me
+     * @param bot
+     * @return
+     */
+    private ClobberBotAction moveAwayFromBot(Point2D me, BotPoint2D bot) {
+        double x = me.getX() - bot.getX();
+        double y = me.getY() - bot.getY();
+        if (Math.abs(x) > Math.abs(y)) { // if |x| > |y|, then you must move right or left
+            return new ClobberBotAction(1, x > 0 ? ClobberBotAction.RIGHT : ClobberBotAction.LEFT);
+        } else {
+            return new ClobberBotAction(1, y > 0 ? ClobberBotAction.DOWN : ClobberBotAction.UP);
+        }
+    }
 
 
     /**
@@ -174,8 +195,8 @@ public class brooklyngrant extends ClobberBot {
         double predictedY = bot.getY() + botVelocityY * distanceFromMe;
     
         // shoot this way
-        double predictDx = predictedX - me.getX();
-        double predictDy = predictedY - me.getY();
+        double predictDx = predictedX;//- me.getX();
+        double predictDy = predictedY;// - me.getY();
     
         if (Math.abs(predictDx) > Math.abs(predictDy)) {
             return new ClobberBotAction(1, predictDx > 0 ? (ClobberBotAction.SHOOT | ClobberBotAction.RIGHT) : (ClobberBotAction.SHOOT | ClobberBotAction.LEFT));
