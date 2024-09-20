@@ -13,6 +13,10 @@ import java.io.IOException;
 public class brooklyngrant extends ClobberBot {
     private BufferedImage myImage;
     private Map<BotPoint2D, Point2D> previousPositions = new HashMap<>();
+    ClobberBotAction currAction;
+
+    private final int SAFE_DISTANCE = 30; 
+    private final int SHOOT_DISTANCE = 200; 
     
     /**
      * Constructor
@@ -28,11 +32,6 @@ public class brooklyngrant extends ClobberBot {
             e.printStackTrace();
         }
     }
-
-    ClobberBotAction currAction;
-
-    private final int SAFE_DISTANCE = 30; 
-    private final int SHOOT_DISTANCE = 250; 
 
     /**
      * Plan moves
@@ -56,26 +55,20 @@ public class brooklyngrant extends ClobberBot {
     
         BotPoint2D nearestBot = findNearestBot(me, bots);
         if (nearestBot != null) {
-            if (me.distance(nearestBot) < SAFE_DISTANCE) {
+            double distanceToBot = me.distance(nearestBot);
+    
+            if (distanceToBot < SAFE_DISTANCE) {
+                // move away if too close
                 currAction = moveAwayFromBot(me, nearestBot);
                 return currAction;
-            } else if (me.distance(nearestBot) < SHOOT_DISTANCE) {
+            } else if (distanceToBot < SHOOT_DISTANCE) {
+                // shoot if in range
                 currAction = shootAtBot(me, nearestBot);
                 return currAction;
-            }
-        }
-    
-        if (currAction == null || ((currAction.getAction() & ClobberBotAction.SHOOT) > 0) || rand.nextInt(10) > 8) {
-            // random logic - better to shoot then to not!
-            switch (rand.nextInt(8)) {
-                case 0: currAction = new ClobberBotAction(rand.nextInt(2) + 1, ClobberBotAction.UP); break;
-                case 1: currAction = new ClobberBotAction(rand.nextInt(2) + 1, ClobberBotAction.DOWN); break;
-                case 2: currAction = new ClobberBotAction(rand.nextInt(2) + 1, ClobberBotAction.LEFT); break;
-                case 3: currAction = new ClobberBotAction(rand.nextInt(2) + 1, ClobberBotAction.RIGHT); break;
-                case 4: currAction = new ClobberBotAction(rand.nextInt(2) + 1, ClobberBotAction.UP | ClobberBotAction.LEFT); break;
-                case 5: currAction = new ClobberBotAction(rand.nextInt(2) + 1, ClobberBotAction.UP | ClobberBotAction.RIGHT); break;
-                case 6: currAction = new ClobberBotAction(rand.nextInt(2) + 1, ClobberBotAction.DOWN | ClobberBotAction.LEFT); break;
-                default: currAction = new ClobberBotAction(rand.nextInt(2) + 1, ClobberBotAction.DOWN | ClobberBotAction.RIGHT); break;
+            } else {
+                // move to bot
+                currAction = moveTowardBot(me, nearestBot);
+                return currAction;
             }
         }
 
@@ -128,21 +121,37 @@ public class brooklyngrant extends ClobberBot {
         double x = me.getX() - bullet.getX();
         double y = me.getY() - bullet.getY();
         if (Math.abs(x) > Math.abs(y)) { // if |x| > |y|, then you must move right or left
-            return new ClobberBotAction(1, x > 0 ? ClobberBotAction.RIGHT : ClobberBotAction.LEFT);
+            return new ClobberBotAction(ClobberBotAction.MOVE, x > 0 ? ClobberBotAction.RIGHT : ClobberBotAction.LEFT);
         } else {
-            return new ClobberBotAction(1, y > 0 ? ClobberBotAction.DOWN : ClobberBotAction.UP);
+            return new ClobberBotAction(ClobberBotAction.MOVE, y > 0 ? ClobberBotAction.DOWN : ClobberBotAction.UP);
         }
     }
     
     /**
-     * Move from bot!
+     * Move away from bot!
      * @param me
      * @param bot
-     * @return
+     * @return action
      */
     private ClobberBotAction moveAwayFromBot(Point2D me, BotPoint2D bot) {
         double x = me.getX() - bot.getX();
         double y = me.getY() - bot.getY();
+        if (Math.abs(x) > Math.abs(y)) { // if |x| > |y|, then you must move right or left
+            return new ClobberBotAction(ClobberBotAction.MOVE, x > 0 ? ClobberBotAction.RIGHT : ClobberBotAction.LEFT);
+        } else {
+            return new ClobberBotAction(ClobberBotAction.MOVE, y > 0 ? ClobberBotAction.DOWN : ClobberBotAction.UP);
+        }
+    }
+
+    /**
+     * Move toward bot !
+     * @param me
+     * @param bot
+     * @return action
+     */
+    private ClobberBotAction moveTowardBot(Point2D me, BotPoint2D bot) {
+        double x = bot.getX() - me.getX();
+        double y = bot.getY() - me.getY();
         if (Math.abs(x) > Math.abs(y)) { // if |x| > |y|, then you must move right or left
             return new ClobberBotAction(1, x > 0 ? ClobberBotAction.RIGHT : ClobberBotAction.LEFT);
         } else {
@@ -188,20 +197,30 @@ public class brooklyngrant extends ClobberBot {
             botVelocityY = bot.getY() - previousPosition.getY();
         }
     
-        double distanceFromMe = me.distance(bot);
-    
         // predict the bot's future position
-        double predictedX = bot.getX() + botVelocityX * distanceFromMe;
-        double predictedY = bot.getY() + botVelocityY * distanceFromMe;
+        double predictedX = bot.getX() + botVelocityX;
+        double predictedY = bot.getY() + botVelocityY;
     
         // shoot this way
-        double predictDx = predictedX;//- me.getX();
-        double predictDy = predictedY;// - me.getY();
+        double deltaX = predictedX - me.getX();
+        double deltaY = predictedY - me.getY();
     
-        if (Math.abs(predictDx) > Math.abs(predictDy)) {
-            return new ClobberBotAction(2, predictDx > 0 ? (ClobberBotAction.SHOOT | ClobberBotAction.RIGHT) : (ClobberBotAction.SHOOT | ClobberBotAction.LEFT));
+        if (Math.abs(deltaX) > 0 && Math.abs(deltaY) > 0) {
+            if (deltaX > 0 && deltaY > 0) {
+                return new ClobberBotAction(ClobberBotAction.SHOOT, ClobberBotAction.DOWN | ClobberBotAction.RIGHT);
+            } else if (deltaX > 0 && deltaY < 0) {
+                return new ClobberBotAction(ClobberBotAction.SHOOT, ClobberBotAction.UP | ClobberBotAction.RIGHT);
+            } else if (deltaX < 0 && deltaY > 0) {
+                return new ClobberBotAction(ClobberBotAction.SHOOT, ClobberBotAction.DOWN | ClobberBotAction.LEFT);
+            } else {
+                return new ClobberBotAction(ClobberBotAction.SHOOT, ClobberBotAction.UP | ClobberBotAction.LEFT);
+            }
+        }
+        
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            return new ClobberBotAction(ClobberBotAction.SHOOT, deltaX > 0 ? ClobberBotAction.RIGHT : ClobberBotAction.LEFT);
         } else {
-            return new ClobberBotAction(2, predictDy > 0 ? (ClobberBotAction.SHOOT | ClobberBotAction.DOWN) : (ClobberBotAction.SHOOT | ClobberBotAction.UP));
+            return new ClobberBotAction(ClobberBotAction.SHOOT, deltaY > 0 ? ClobberBotAction.DOWN : ClobberBotAction.UP);
         }
     }
     
